@@ -1,0 +1,6 @@
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} !^/js/.*\.js$
+RewriteCond %{REQUEST_URI} !^/css/.*\.css$
+
+RewriteRule ^ index.php [L]

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="{{ charset }}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/utils/app.js"></script>
+    {{ extra_scripts }}
+    <script>
+        var APP_INPUT = JSON.parse("{{ app_input }}");
+        Object.freeze(APP_INPUT);
+        var app = new App();
+    </script>
+</head>
+<body>
