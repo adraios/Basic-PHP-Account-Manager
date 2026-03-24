@@ -52,7 +52,7 @@ class Logger
     {
         $content = self::formatLogMessage(LogType::ERROR, $message, $backtrace);
         self::writeToLogFile($content, self::getLogName());
-        self::writeToLogFile($content, self::getLogName(error: true));
+        self::writeToLogFile($content, "error_" . self::getLogName());
     }
 
     /**
@@ -96,6 +96,12 @@ class Logger
      */
     private static function writeToLogFile(string $message, string $filename) : void
     {
+        // Create log dir if it doesn't exist
+        if (!is_dir(self::LOG_PATH))
+        {
+            if (!mkdir(self::LOG_PATH, 0755, true)) return;
+        }
+
         // Write to log file
         file_put_contents(self::LOG_PATH . $filename, $message, FILE_APPEND);
     }
@@ -117,14 +123,11 @@ class Logger
 
     /**
      * Generates a log file name based on the current date.
-     * @param bool $error Indicates whether the log is for errors.
      * @return string The generated log file name.
      */
-    private static function getLogName(bool $error = false) : string
+    private static function getLogName() : string
     {
         $date = date('Y-m-d');
-        
-        if ($error) return "error_$date.log";
         
         return "$date.log";
     }

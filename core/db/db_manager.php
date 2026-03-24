@@ -41,6 +41,11 @@ abstract class DB
         return $db;
     }
 
+    public static function destroyDB()
+    {
+        if (!is_null(self::$database)) self::$database->disconnect();
+    }
+
     public abstract function getNewStatement(DBStatementType $type) : DBStatement;
 
     public abstract function get(DBStatement $statement);

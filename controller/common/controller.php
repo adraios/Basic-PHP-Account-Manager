@@ -21,13 +21,13 @@ class Controller
         $controller_class::render($data);
 
         // Clean DB connection
-        DB::disconnect();
+        DB::destroyDB();
     }
 
     protected static function buildPage(string $controller_path, array $data = array(), array $extra = array()) : void
     {
         // Check if controller exists
-        if (!file_exists(self::VIEW_PATH . $controller_path . '.html')) {
+        if (!file_exists(self::VIEW_PATH . $controller_path . '_view.html')) {
             throw new Exception("Page not found: " . $controller_path, 400);
         }
 

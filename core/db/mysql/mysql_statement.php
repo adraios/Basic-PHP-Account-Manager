@@ -96,12 +96,12 @@ class MySQLStatement extends DBStatement
 
     private function genUpdate() : string
     {
-        
+        return "";
     }
 
     private function genDelete() : string
     {
-
+        return "";
     }
 
     private function genWhere(array $conditions, array &$params = [], int &$count = 0) : string
@@ -142,17 +142,17 @@ class MySQLStatement extends DBStatement
 
     private function genGroupBy() : string
     {
-
+        return "";
     }
 
     private function genOrderBy() : string
     {
-
+        return "";
     }
 
     private function genLimit() : string
     {
-
+        return "";
     }
 
     public function checkFormatValue($value) : bool

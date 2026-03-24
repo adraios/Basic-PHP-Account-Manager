@@ -15,7 +15,7 @@ require_once 'logger.php';
 require_once 'config.php';
 require_once CONTROLLER_PATH . 'common/controller.php';
 require_once 'errorHandler.php';
-require_once 'db.php';
+require_once 'db/db_manager.php';
 require_once 'languages.php';
 require_once 'session.php';
 require_once 'router.php';
