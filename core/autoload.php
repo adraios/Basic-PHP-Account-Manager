@@ -1,7 +1,8 @@
 <?php
 // Define base paths
 define('BASE_PATH', __DIR__ . '/../');
-define('CONTROLLER_PATH', BASE_PATH . 'controller/');    
+define('CONTROLLER_PATH', BASE_PATH . 'controller/');
+define('DB_PATH', BASE_PATH . 'core/db/');
 
 /* Set error reporting
 ini_set('display_errors', 0);

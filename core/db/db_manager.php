@@ -1,4 +1,6 @@
 <?php
+require_once('db_statement.php');
+
 enum DBType : string
 {
     case SQL = "sql";
@@ -16,7 +18,7 @@ abstract class DB
     protected string $password;
     protected string $name;
 
-    public function __construct()
+    private function __construct()
     {
         $this->host = getenv('DB_HOST');
         $this->user = getenv('DB_USER');
@@ -29,13 +31,17 @@ abstract class DB
     public static function getDB() : DB
     {
         if (!is_null(self::$database)) return self::$database;
-
+        
         $type = DBType::tryFrom(getenv("DB_TYPE"));
-        $db = match($type)
+        if (is_null($type) || !is_dir(DB_PATH . strtolower($type->value)))
         {
-            DBType::MYSQL   => new MySQLDB(),
-            default         => new self(),
-        };
+            throw new UnexpectedValueException("DB type not supported!", 600);
+        }
+
+        require_once(DB_PATH . strtolower($type->value) . "/" . strtolower($type->value) . "_db.php");
+
+        $class = $type->name . "DB";
+        $db = new $class();
 
         self::$database = $db;
         return $db;
@@ -46,7 +52,7 @@ abstract class DB
         if (!is_null(self::$database)) self::$database->disconnect();
     }
 
-    public abstract function getNewStatement(DBStatementType $type) : DBStatement;
+    public abstract function getNewStatement(DBStatementType $type, ?string $table) : DBStatement;
 
     public abstract function get(DBStatement $statement);
     public abstract function getValues(DBStatement $statement);

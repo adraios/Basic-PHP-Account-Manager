@@ -7,10 +7,12 @@ class Languages
 
     public static function loadAcceptedLanguages()
     {
-        ///////////// TODO Load accepted languages from DB //////////////
+        // Load accepted languages from DB
+        $statement = DB::getDB()->getNewStatement(DBStatementType::SELECT, 'languages');
+        $statement->setFields(['id']);
+        $values = DB::getDB()->getValues($statement);
 
-        // Simulate loading accepted languages
-        self::$accepted_languages = ['en', 'es', 'de'];
+        self::$accepted_languages = array_column($values, "id");
     }
 
     public static function isAcceptedLanguage(string $lang_code)

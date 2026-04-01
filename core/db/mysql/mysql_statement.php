@@ -19,7 +19,7 @@
  * ]
  */
 
-class MySQLStatement extends DBStatement
+class MYSQLStatement extends DBStatement
 {
     private array $params = [];
 
@@ -38,15 +38,13 @@ class MySQLStatement extends DBStatement
             DBStatementType::INSERT => $this->genInsert(),
             DBStatementType::UPDATE => $this->genUpdate(),
             DBStatementType::DELETE => $this->genDelete(),
-            default => throw new InvalidArgumentException("Invalid DBStatementType!", 603)
+            default => throw new InvalidArgumentException("Unsupported DBStatementType!", 603)
         };
     }
 
     private function genSelect() : string
     {
-        if (empty($this->fields)) throw new InvalidArgumentException("Cannot generate Select statement with empty fields!", 604);
-        if (empty($this->table)) throw new InvalidArgumentException("Cannot generate Select statement with empty table!", 605);
-        $table = $this->sanitize($this->table);
+        $this->checkParams();
 
         $query = "SELECT ";
         
@@ -60,22 +58,20 @@ class MySQLStatement extends DBStatement
         }
         $query .= $fields;
 
-        $query .= " FROM `$table`";
-        $query .= " WHERE " . $this->genWhere($this->condition, $this->params);
-        if (!empty($this->group)) $query .= $this->genGroupBy();
-        if (!empty($this->order)) $query .= $this->genOrderBy();
-        if (!empty($this->limit)) $query .= $this->genLimit();
+        $query .= " FROM `$this->table`";
+        $query .= $this->genWhere();
+        $query .= $this->genGroupBy();
+        $query .= $this->genOrderBy();
+        $query .= $this->genLimit();
 
         return $query;
     }
 
     private function genInsert() : string
     {
-        if (empty($this->fields)) throw new InvalidArgumentException("Cannot generate Insert statement with empty fields!", 604);
-        if (empty($this->table)) throw new InvalidArgumentException("Cannot generate Insert statement with empty table!", 605);
-        $table = $this->sanitize($this->table);
+        $this->checkParams();
 
-        $query = "INSERT INTO `$table` (`";
+        $query = "INSERT INTO `$this->table` (`";
 
         $fields = "";
         foreach ($this->fields as $key => $value)
@@ -96,15 +92,26 @@ class MySQLStatement extends DBStatement
 
     private function genUpdate() : string
     {
+        throw new ErrorException("Not yet implemented!", 1000);
+
         return "";
     }
 
     private function genDelete() : string
     {
+        throw new ErrorException("Not yet implemented!", 1001);
+
         return "";
     }
 
-    private function genWhere(array $conditions, array &$params = [], int &$count = 0) : string
+    private function genWhere() : string
+    {
+        if (empty($this->condition)) return "";
+
+        return " WHERE " . $this->genWhereRec($this->condition, $this->params);
+    }
+
+    private function genWhereRec(array $conditions, array &$params = [], int &$count = 0) : string
     {
         $where = '';
         foreach ($conditions as $logic => $condition)
@@ -128,6 +135,8 @@ class MySQLStatement extends DBStatement
 
                 [$key, $operator, $value] = $subcondition;
 
+                if (!$this->allowedOperator($operator)) throw new InvalidArgumentException("Invalid Operator!", 606);
+
                 $key = $this->sanitize($key);
                 $paramKey = ':' . $key . $count++;
                 $params[$paramKey] = $value;
@@ -142,17 +151,32 @@ class MySQLStatement extends DBStatement
 
     private function genGroupBy() : string
     {
-        return "";
+        if (empty($this->group)) return "";
+
+        return " GROUP BY " . implode(", ", $this->group);
     }
 
     private function genOrderBy() : string
     {
-        return "";
+        if (empty($this->order)) return "";
+
+        return " ORDER BY " . implode(", ", $this->order);
     }
 
     private function genLimit() : string
     {
-        return "";
+        if (empty($this->limit)) return "";
+        if (sizeof($this->limit) > 2) $this->limit = array_slice($this->limit, 0, 2); // TEST!!!!!
+
+        return " LIMIT " . implode(", ", $this->limit);
+    }
+
+    private function checkParams() : void
+    {
+        if (empty($this->fields)) throw new InvalidArgumentException("Cannot generate Insert statement with empty fields!", 604);
+        if (empty($this->table)) throw new InvalidArgumentException("Cannot generate Insert statement with empty table!", 605);
+
+        ////// TODO: Execute checkFormatValue //////
     }
 
     public function checkFormatValue($value) : bool
@@ -162,11 +186,18 @@ class MySQLStatement extends DBStatement
         return true;
     }
 
-    private function sanitize(string $value)
+    protected function sanitize(string $value) : string
     {
         $value = trim($value);
         $value = preg_replace('/\W+/', '_', $value);
 
         return $value;
+    }
+
+    private function allowedOperator(string $operator) : bool
+    {
+        $operators = ['=', '!=', '<>', '<', '>', '<=', '>='];
+
+        return in_array($operator, $operators, true);
     }
 }
